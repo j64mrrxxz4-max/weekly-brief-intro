@@ -1,0 +1,17 @@
+# Netlify 配置文件
+
+[build]
+  # 如果没有其他构建步骤，可以直接发布
+  publish = "."
+  command = "echo 'No build required'"
+
+[[redirects]]
+  # 确保所有路由都指向 index.html
+  from = "/*"
+  to = "/ai-presentation.html"
+  status = 200
+
+[dev]
+  # 本地开发服务器配置
+  port = 8080
+  autoLaunch = true
