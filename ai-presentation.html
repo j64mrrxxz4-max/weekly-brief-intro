@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 自动化周简报搭建指南</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: #1a1a2e; overflow-x: hidden; }
+        .slide { width: 100vw; min-height: 100vh; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 60px 80px; display: none; }
+        .slide.active { display: flex; flex-direction: column; }
+        .slide-cover { justify-content: center; align-items: center; text-align: center; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); }
+        .slide-cover h1 { font-size: 56px; color: #fff; margin-bottom: 20px; font-weight: 700; }
+        .slide-cover .subtitle { font-size: 24px; color: rgba(255,255,255,0.8); }
+        .slide-cover .author { font-size: 16px; color: rgba(255,255,255,0.6); margin-top: 40px; }
+        .slide-title { font-size: 40px; color: #fff; margin-bottom: 40px; font-weight: 700; }
+        .comparison-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; }
+        .card { background: rgba(255,255,255,0.95); border-radius: 16px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .card-pain { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); }
+        .card-gain { background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); }
+        .card-title { font-size: 22px; font-weight: 700; margin-bottom: 20px; }
+        .card-list { list-style: none; }
+        .card-list li { font-size: 15px; margin-bottom: 10px; line-height: 1.6; }
+        .highlight { font-weight: 700; color: #667eea; }
+        .brief-example { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); color: #1a1a1a; border-radius: 12px; padding: 25px; font-family: monospace; font-size: 13px; line-height: 1.9; border: 1px solid #dee2e6; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .template-structure { background: rgba(255,255,255,0.95); border-radius: 12px; padding: 20px; }
+        .template-section { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-left: 4px solid #667eea; padding: 12px; border-radius: 6px; margin-bottom: 10px; }
+        .template-section-title { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-bottom: 6px; }
+        .template-section-desc { font-size: 11px; color: #4a5568; line-height: 1.6; }
+        .template-icon { font-size: 14px; margin-right: 6px; }
+        .grid-6 { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 1px; background: rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden; }
+        .grid-item { background: rgba(255,255,255,0.98); padding: 20px; }
+        .grid-title { font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 2px solid #e5e7eb; }
+        .target-content { background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-left: 3px solid #0284c7; padding: 12px; border-radius: 6px; font-size: 12px; color: #0c4a6e; line-height: 1.8; }
+        .data-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .data-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px; text-align: center; }
+        .data-icon { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px; margin: 0 auto 6px; }
+        .icon-blue { background: #dbeafe; color: #2563eb; }
+        .icon-indigo { background: #e0e7ff; color: #4f46e5; }
+        .icon-purple { background: #ede9fe; color: #7c3aed; }
+        .icon-green { background: #dcfce7; color: #16a34a; }
+        .data-title { font-size: 11px; font-weight: 600; color: #1a1a1a; }
+        .data-desc { font-size: 10px; color: #6b7280; }
+        .tech-flow { display: flex; align-items: center; gap: 6px; }
+        .tech-step { flex: 1; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; text-align: center; }
+        .tech-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; margin: 0 auto 4px; }
+        .tech-title { font-size: 11px; font-weight: 600; color: #1a1a1a; }
+        .tech-desc { font-size: 9px; color: #64748b; }
+        .tech-arrow { font-size: 16px; color: #94a3b8; }
+        .feature-list { list-style: none; }
+        .feature-item { display: flex; align-items: center; gap: 8px; padding: 10px; border: 1px solid #e5e7eb; border-radius: 6px; margin-bottom: 6px; font-size: 11px; }
+        .feature-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .timeline-list { position: relative; padding-left: 20px; }
+        .timeline-list::before { content: ''; position: absolute; left: 6px; top: 0; bottom: 0; width: 2px; background: #667eea; }
+        .timeline-item { position: relative; padding-left: 16px; margin-bottom: 12px; }
+        .timeline-item::before { content: ''; position: absolute; left: -18px; top: 4px; width: 8px; height: 8px; background: #fff; border: 2px solid #667eea; border-radius: 50%; }
+        .timeline-title { font-size: 12px; font-weight: 600; color: #1a1a1a; }
+        .timeline-desc { font-size: 10px; color: #6b7280; }
+        .data-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; }
+        .data-table th { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 10px; text-align: left; font-size: 13px; }
+        .data-table td { padding: 10px; border: 1px solid #e5e7eb; font-size: 12px; }
+        .flow-chart { background: rgba(255,255,255,0.95); border-radius: 16px; padding: 30px; }
+        .flow-step { background: #1a1a2e; color: #fff; padding: 12px 25px; border-radius: 8px; text-align: center; margin: 10px auto; max-width: 350px; font-size: 13px; }
+        .flow-arrow { text-align: center; font-size: 20px; color: rgba(255,255,255,0.6); }
+        .timeline { display: flex; gap: 20px; }
+        .timeline-phase { flex: 1; background: rgba(255,255,255,0.95); border-radius: 12px; padding: 20px; }
+        .phase-title { font-size: 16px; font-weight: 700; color: #1a1a1a; margin-bottom: 15px; text-align: center; }
+        .phase-list { list-style: none; }
+        .phase-list li { font-size: 12px; color: #666; margin-bottom: 8px; padding-left: 15px; position: relative; }
+        .phase-list li::before { content: '✓'; position: absolute; left: 0; color: #667eea; }
+        .prompt-box { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-left: 4px solid #2563eb; padding: 15px; border-radius: 8px; margin-top: 20px; }
+        .prompt-title { font-size: 14px; font-weight: 600; color: #1e40af; margin-bottom: 8px; }
+        .prompt-content { font-size: 13px; color: #1e3a8a; }
+        .nav-btn { position: fixed; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.2); border: none; color: #fff; font-size: 32px; padding: 20px; cursor: pointer; border-radius: 50%; z-index: 1000; }
+        .nav-btn:hover { background: rgba(255,255,255,0.4); }
+        .nav-prev { left: 20px; }
+        .nav-next { right: 20px; }
+        .dashboard-image { width: 100%; height: 70vh; object-fit: contain; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); background: rgba(255,255,255,0.95); padding: 20px; }
+        .dashboard-container { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 30px; align-items: start; }
+        .dashboard-image-wrapper { background: rgba(255,255,255,0.95); border-radius: 12px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+        .dashboard-image-wrapper img { width: 100%; height: 65vh; object-fit: contain; }
+        .image-placeholder { background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%); display: flex; align-items: center; justify-content: center; color: #718096; font-size: 1rem; text-align: center; padding: 40px; border: 2px dashed #a0aec0; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <!-- 封面页 -->
+    <div class="slide slide-cover active" data-page="1">
+        <h1>AI 自动化周简报搭建指南</h1>
+        <p class="subtitle">数字化金融团队经验沉淀</p>
+    </div>
+
+    <!-- 第 1 页：价值速览 -->
+    <div class="slide" data-page="2">
+        <h2 class="slide-title">一、价值速览：从"人工汇总"到"智能生成"</h2>
+        <div class="comparison-cards">
+            <div class="card card-pain">
+                <div class="card-title">😫 手动模式痛点</div>
+                <ul class="card-list">
+                    <li>每周需要手动汇总三类数据：</li>
+                    <li>📋 项目进度 | 📋 部门周报 | 📋 运维工单</li>
+                    <li style="margin-top: 15px;">手动汇总 → 整理格式 → 发到部门群</li>
+                    <li class="highlight" style="margin-top: 10px;">⏱️ 耗时：3-4 小时/周</li>
+                </ul>
+            </div>
+            <div class="card card-gain">
+                <div class="card-title">🚀 自动化模式成效</div>
+                <ul class="card-list">
+                    <li>配置完成后，AI 在固定时间自动：</li>
+                    <li>📝 拉取 3 个数据源</li>
+                    <li>📝 按模板生成周简报卡片</li>
+                    <li>📝 确认后发送到部门群</li>
+                    <li class="highlight" style="margin-top: 10px;">⏱️ 耗时：3-5 分钟，每周一 09:30 准时发出</li>
+                    <li style="margin-top: 10px;">已稳定运行：2026 年 4 月起至今</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 第 2 页：落地成果 -->
+    <div class="slide" data-page="3">
+        <h2 class="slide-title">二、落地成果：从"经验依赖"到"数据驱动"</h2>
+        <div class="grid-2" style="grid-template-columns: 1.4fr 0.6fr; gap: 30px; align-items: stretch;">
+            <div class="brief-example" style="overflow-y: auto; max-height: 70vh; height: 100%;">
+                <div style="color: #2d572c; font-weight: 700; font-size: 16px; margin-bottom: 8px;">🗞️ 数字化金融团队周简报</div>
+                <div style="color: #495057; font-size: 13px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #dee2e6;">2026 年 5 月第 2 周（04 月 28 日—05 月 05 日）</div>
+                
+                <div style="margin-top: 15px; color: #6f42c1; font-weight: 600; font-size: 14px;">📊 上周亮点</div>
+                <div style="font-size: 13px; line-height: 1.8;">上周 0514 迭代稳步推进，IPC 交叉验证 BUG 修复及功能优化完成，国内应收跨主体合同关联异常问题完成临时修复，海外应收系统选型完成首轮汇报。</div>
+                
+                <div style="margin-top: 15px; color: #2d572c; font-weight: 600; font-size: 14px;">✅ 上周进展</div>
+                <div style="font-size: 13px; line-height: 1.8;">✅【IPC 交叉验证】BUG 修复及功能优化完成，V1.5 版本稳定运行</div>
+                <div style="font-size: 13px; line-height: 1.8;">✅【电子合同】合同关键数据每日检查、电子合同金额校验异常处理完成（0423 迭代）</div>
+                <div style="font-size: 13px; line-height: 1.8;">✅【国内应收】跨主体合同关联异常问题处理（37 笔流程、20 位客户），全功能回归测试进行中 🔄</div>
+                <div style="font-size: 13px; line-height: 1.8;">✅【海外应收系统】需求评审完成，首轮选型汇报完成，计划与苏工、海龙进一步评估 🔄</div>
+                <div style="font-size: 13px; line-height: 1.8;">✅【星火助手】统一运营平台数据打通文档输出</div>
+                <div style="font-size: 13px; line-height: 1.8;">✅【行情随身听】收听率统计、分享订阅功能上线，自动播放原型设计完成</div>
+                
+                <div style="margin-top: 15px; color: #856404; font-weight: 600; font-size: 14px;">⚠️ 风险与阻塞</div>
+                <div style="font-size: 13px; line-height: 1.8;">暂无重大阻塞风险。IPC 交叉验证仍需持续关注模型运行稳定性，国内应收跨主体合同关联问题需跟进线下补签方案执行进度。</div>
+                
+                <div style="margin-top: 15px; color: #004085; font-weight: 600; font-size: 14px;">📈 年度目标偏差评估</div>
+                <div style="color: #2d572c; font-size: 13px; font-weight: 600;">✅ 进度正常</div>
+                <div style="font-size: 13px; line-height: 1.8;">【产业金融系统迭代交付】0514 迭代按计划推进，多项功能进入测试/验收阶段</div>
+                <div style="font-size: 13px; line-height: 1.8;">【服务台运营效率】工单响应及时，平均处理效率保持稳定</div>
+                <div style="font-size: 13px; line-height: 1.8;">【AI 效能工具落地】广西、闽潮汕区域农牧信息晨报 skill 稳定运行</div>
+                <div style="color: #856404; font-size: 13px; font-weight: 600; margin-top: 8px;">🟡 需关注</div>
+                <div style="font-size: 13px; line-height: 1.8;">【IPC 附件互通功能】需加快产品评审及开发节奏</div>
+                <div style="font-size: 13px; line-height: 1.8;">【国内应收推广】跨主体合同关联问题仍有部分历史数据待清理</div>
+                <div style="color: #721c24; font-size: 13px; font-weight: 600; margin-top: 8px;">🔴 需加速</div>
+                <div style="font-size: 13px; line-height: 1.8;">【海外应收系统上线】选型阶段进度需加快，确保 Q2 上线目标</div>
+                
+                <div style="margin-top: 15px; color: #2d572c; font-weight: 600; font-size: 14px;">📅 本周重点</div>
+                <div style="font-size: 13px; line-height: 1.8;">• 0514 迭代开发推进（负责人：全员）</div>
+                <div style="font-size: 13px; line-height: 1.8;">• IPC 交叉验证功能评审（负责人：吴纪京）</div>
+                <div style="font-size: 13px; line-height: 1.8;">• 国内应收系统全功能回归测试（负责人：黄雯婷、黄敬龙）</div>
+                <div style="font-size: 13px; line-height: 1.8;">• 海外应收系统汉得 H0 方案评估（负责人：黄炳桂）</div>
+                <div style="font-size: 13px; line-height: 1.8;">• 电子合同短链推送功能测试上线（负责人：黄敬龙）</div>
+                
+                <div style="margin-top: 15px; color: #856404; font-weight: 600; font-size: 14px;">🔔 运维服务台动态（近 30 天累计）</div>
+                <div style="font-size: 13px; line-height: 1.8;">指标：<strong>工单总数</strong>, 数值：<strong>808 条</strong></div>
+                <div style="font-size: 13px; line-height: 1.8;">指标：<strong>已解决</strong>, 数值：<strong>769 条</strong></div>
+                <div style="font-size: 13px; line-height: 1.8;">指标：<strong>机器人关闭（未转人工）</strong>, 数值：<strong>284 条</strong></div>
+                <div style="margin-top: 10px; color: #6f42c1; font-weight: 600; font-size: 13px;">本周高频问题类型：</div>
+                <div style="font-size: 13px; line-height: 1.8;">📌 额度占用/释放异常问题</div>
+                <div style="font-size: 13px; line-height: 1.8;">📌 授信申请流程问题</div>
+                <div style="font-size: 13px; line-height: 1.8;">📌 电子合同签章权限问题</div>
+                <div style="font-size: 13px; line-height: 1.8;">📌 跨主体合同关联问题</div>
+                <div style="font-size: 13px; line-height: 1.8;">📌 系统操作指引咨询</div>
+                <div style="margin-top: 10px; color: #6f42c1; font-weight: 600; font-size: 13px;">典型案例：</div>
+                <div style="font-size: 13px; line-height: 1.8;">📌 <strong>跨主体合同关联异常处理</strong>（负责人：黄雯婷、黄敬龙）</div>
+                <div style="font-size: 12px; line-height: 1.6; margin-left: 20px; color: #666;">问题现象：客户存在多头授信时，系统按客户维度带出签署合同会错误关联其他公司合同。</div>
+                <div style="font-size: 12px; line-height: 1.6; margin-left: 20px; color: #666;">解决建议：已完成临时字段映射 + 线下补签方案，系统逻辑修复纳入 0514 迭代。</div>
+                <div style="font-size: 13px; line-height: 1.8; margin-top: 8px;">📌 <strong>非工作时段工单积压</strong>（负责人：运维团队）</div>
+                <div style="font-size: 12px; line-height: 1.6; margin-left: 20px; color: #666;">问题现象：非工作时段提交工单需次日处理。</div>
+                <div style="font-size: 12px; line-height: 1.6; margin-left: 20px; color: #666;">建议增加非工作时段紧急工单处理机制。</div>
+                <div style="font-size: 13px; line-height: 1.8; margin-top: 8px;">📌 <strong>额度数据更新延迟</strong>（负责人：黄敬龙）</div>
+                <div style="font-size: 12px; line-height: 1.6; margin-left: 20px; color: #666;">问题现象：回款后额度未及时释放，影响后续业务办理。</div>
+                <div style="font-size: 12px; line-height: 1.6; margin-left: 20px; color: #666;">建议调整定时任务执行频率。</div>
+                
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #dee2e6;">
+                    <div style="color: #6c757d; font-size: 12px; font-weight: 600;">📎 相关链接</div>
+                    <div style="font-size: 12px; color: #6c757d; line-height: 1.8;">项目进度看板 | 运维监控看板 | 工单分析报告</div>
+                    <div style="font-size: 11px; color: #6c757d; margin-top: 8px;">数据来源：项目进度看板、部门周报汇总、产业金融服务台运维记录</div>
+                    <div style="font-size: 11px; color: #6c757d;">生成时间：2026 年 05 月 06 日</div>
+                </div>
+            </div>
+            <div class="template-structure" style="overflow-y: auto; max-height: 70vh; height: 100%;">
+                <h3 style="color: #1a1a1a; margin-bottom: 15px; font-size: 16px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 12px; border-radius: 8px;">📋 固定模板结构</h3>
+                <div class="template-section" style="border-left-color: #667eea; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">🗞️</span>报头信息</div>
+                    <div class="template-section-desc" style="font-size: 10px;">团队名称 + 周次 + 日期范围</div>
+                </div>
+                <div class="template-section" style="border-left-color: #28a745; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">📊</span>上周亮点</div>
+                    <div class="template-section-desc" style="font-size: 10px;">1-2 句话概括本周最重要进展</div>
+                </div>
+                <div class="template-section" style="border-left-color: #28a745; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">✅</span>上周进展</div>
+                    <div class="template-section-desc" style="font-size: 10px;">分项目列出具体完成事项（6-8 条）</div>
+                </div>
+                <div class="template-section" style="border-left-color: #ffc107; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">⚠️</span>风险与阻塞</div>
+                    <div class="template-section-desc" style="font-size: 10px;">说明当前风险点和需要关注的事项</div>
+                </div>
+                <div class="template-section" style="border-left-color: #17a2b8; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">📈</span>年度目标偏差评估</div>
+                    <div class="template-section-desc" style="font-size: 10px;">🟢 进度正常 / 🟡 需关注 / 🔴 需加速</div>
+                </div>
+                <div class="template-section" style="border-left-color: #28a745; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">📅</span>本周重点</div>
+                    <div class="template-section-desc" style="font-size: 10px;">列出本周关键任务 + 负责人（5-6 条）</div>
+                </div>
+                <div class="template-section" style="border-left-color: #ffc107; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">🔔</span>运维服务台动态</div>
+                    <div class="template-section-desc" style="font-size: 10px;">工单数据 + 高频问题 + 典型案例（近 30 天）</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 第 2-1 页：项目进度看板 -->
+    <div class="slide" data-page="3-1">
+        <h2 class="slide-title">二、落地成果：从"经验依赖"到"数据驱动"</h2>
+        <div class="grid-2" style="grid-template-columns: 1.4fr 0.6fr; gap: 30px; align-items: stretch;">
+            <div style="background: rgba(255,255,255,0.95); border-radius: 16px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); overflow-y: auto; max-height: 70vh; height: 100%;">
+                <h3 style="color: #1a1a1a; margin-bottom: 20px; font-size: 18px; text-align: center;">📊 项目进度看板</h3>
+                <img src="项目进度看板.png" alt="项目进度看板" style="width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            </div>
+            <div class="template-structure" style="overflow-y: auto; max-height: 70vh; height: 100%;">
+                <h3 style="color: #1a1a1a; margin-bottom: 15px; font-size: 16px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 12px; border-radius: 8px;">📋 固定模板结构</h3>
+                <div class="template-section" style="border-left-color: #2c3e50; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">📋</span>迭代信息</div>
+                    <div class="template-section-desc" style="font-size: 10px;">迭代周期、迭代版本号、总需求数</div>
+                </div>
+                <div class="template-section" style="border-left-color: #3498db; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">📊</span>核心指标</div>
+                    <div class="template-section-desc" style="font-size: 10px;">总需求数、整体完成度、待上线数、紧急需求数（4 个数据卡片）</div>
+                </div>
+                <div class="template-section" style="border-left-color: #9b59b6; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">🎯</span>整体完成度</div>
+                    <div class="template-section-desc" style="font-size: 10px;">环形图展示迭代整体进度百分比</div>
+                </div>
+                <div class="template-section" style="border-left-color: #e67e22; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">📈</span>各阶段分布</div>
+                    <div class="template-section-desc" style="font-size: 10px;">环形图展示各阶段需求数量分布</div>
+                </div>
+                <div class="template-section" style="border-left-color: #e74c3c; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">⚠️</span>紧急需求清单</div>
+                    <div class="template-section-desc" style="font-size: 10px;">紧急需求列表及数量统计</div>
+                </div>
+                <div class="template-section" style="border-left-color: #27ae60; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">✅</span>即将上线清单</div>
+                    <div class="template-section-desc" style="font-size: 10px;">待上线需求列表及数量统计</div>
+                </div>
+                <div class="template-section" style="border-left-color: #1abc9c; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">📊</span>各阶段详情</div>
+                    <div class="template-section-desc" style="font-size: 10px;">条形图展示各阶段具体需求数量</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 第 2-2 页：运维看板 -->
+    <div class="slide" data-page="3-2">
+        <h2 class="slide-title">二、落地成果：从"经验依赖"到"数据驱动"</h2>
+        <div class="grid-2" style="grid-template-columns: 1.4fr 0.6fr; gap: 30px; align-items: stretch;">
+            <div style="background: rgba(255,255,255,0.95); border-radius: 16px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); overflow-y: auto; max-height: 70vh; height: 100%;">
+                <h3 style="color: #1a1a1a; margin-bottom: 20px; font-size: 18px; text-align: center;">📊 运维看板</h3>
+                <img src="运维看板.jpg" alt="运维看板" style="width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            </div>
+            <div class="template-structure" style="overflow-y: auto; max-height: 70vh; height: 100%;">
+                <h3 style="color: #1a1a1a; margin-bottom: 15px; font-size: 16px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 12px; border-radius: 8px;">📋 固定模板结构</h3>
+                <div class="template-section" style="border-left-color: #667eea; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">🗞️</span>报头信息</div>
+                    <div class="template-section-desc" style="font-size: 10px;">统计周期 + 数据更新时间</div>
+                </div>
+                <div class="template-section" style="border-left-color: #28a745; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">📊</span>核心指标</div>
+                    <div class="template-section-desc" style="font-size: 10px;">工单总量、解决率、响应时效、满意度</div>
+                </div>
+                <div class="template-section" style="border-left-color: #667eea; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">✨</span>AI 洞察</div>
+                    <div class="template-section-desc" style="font-size: 10px;">AI 自动分析异常指标、趋势预警、根因推测</div>
+                </div>
+                <div class="template-section" style="border-left-color: #28a745; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">✅</span>处理概况</div>
+                    <div class="template-section-desc" style="font-size: 10px;">已解决/处理中/未解决工单分布</div>
+                </div>
+                <div class="template-section" style="border-left-color: #ffc107; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">⭐</span>评价情况</div>
+                    <div class="template-section-desc" style="font-size: 10px;">满意度评价分布、差评工单统计</div>
+                </div>
+                <div class="template-section" style="border-left-color: #17a2b8; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">📈</span>趋势分析</div>
+                    <div class="template-section-desc" style="font-size: 10px;">活跃工单数量趋势统计</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 第 2-3 页：工单分析报告 -->
+    <div class="slide" data-page="3-3">
+        <h2 class="slide-title">二、落地成果：从"经验依赖"到"数据驱动"</h2>
+        <div class="grid-2" style="grid-template-columns: 1.4fr 0.6fr; gap: 30px; align-items: stretch;">
+            <div style="background: rgba(255,255,255,0.95); border-radius: 16px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); overflow-y: auto; max-height: 70vh; height: 100%;">
+                <h3 style="color: #1a1a1a; margin-bottom: 20px; font-size: 18px; text-align: center;">📊 工单分析报告</h3>
+                <img src="工单分析报告.png" alt="工单分析报告" style="width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            </div>
+            <div class="template-structure" style="overflow-y: auto; max-height: 70vh; height: 100%;">
+                <h3 style="color: #1a1a1a; margin-bottom: 15px; font-size: 16px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 12px; border-radius: 8px;">📋 固定模板结构</h3>
+                <div class="template-section" style="border-left-color: #667eea; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">📊</span>核心指标概览</div>
+                    <div class="template-section-desc" style="font-size: 10px;">工单总数、解决率、满意度、响应时效等核心数据</div>
+                </div>
+                <div class="template-section" style="border-left-color: #28a745; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">📈</span>详细数据分析</div>
+                    <div class="template-section-desc" style="font-size: 10px;">工单规模与处置效率、问题类型分布、工单状态分布、用户满意度分布</div>
+                </div>
+                <div class="template-section" style="border-left-color: #ffc107; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">⚠️</span>需关注的问题工单</div>
+                    <div class="template-section-desc" style="font-size: 10px;">处理中工单分布、"一般"评价工单汇总</div>
+                </div>
+                <div class="template-section" style="border-left-color: #e74c3c; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">🔍</span>差评工单深度分析</div>
+                    <div class="template-section-desc" style="font-size: 10px;">差评概况、差评案例、服务过程复盘与根因分析、针对性改进建议</div>
+                </div>
+                <div class="template-section" style="border-left-color: #9b59b6; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">🔄</span>重复问题分析</div>
+                    <div class="template-section-desc" style="font-size: 10px;">高频问题分布、问题根因与优化方向</div>
+                </div>
+                <div class="template-section" style="border-left-color: #3498db; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">📋</span>根因改进建议与行动计划</div>
+                    <div class="template-section-desc" style="font-size: 10px;">高频问题根因分析、差评问题根因分析、综合改进建议、行动计划</div>
+                </div>
+                <div class="template-section" style="border-left-color: #1abc9c; padding: 8px; margin-bottom: 8px;">
+                    <div class="template-section-title" style="font-size: 12px;"><span class="template-icon">📊</span>可视化数据仪表盘</div>
+                    <div class="template-section-desc" style="font-size: 10px;">关键数据可视化图表汇总</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 第 3 页：数据流 -->
+    <div class="slide" data-page="4">
+        <h2 class="slide-title">三、核心架构：从"数据孤岛"到"智能聚合"</h2>
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div style="display: inline-block; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); padding: 8px 24px; border-radius: 20px; font-size: 14px; font-weight: 600; letter-spacing: 2px;">
+                数据流说明
+            </div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 20px 50px;">
+            <!-- 数据源 -->
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 16px 50px; border-radius: 8px; font-weight: 700; font-size: 16px; box-shadow: 4px 4px 0 rgba(102,126,234,0.4);">
+                数据源（多维表格）
+            </div>
+            
+            <!-- 箭头 01 + 定时触发 -->
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                <div style="width: 2px; height: 25px; background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);"></div>
+                <div style="background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%); color: #2d3748; padding: 5px 14px; border-radius: 4px; font-size: 11px; font-weight: 600; border: 2px solid #667eea; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">01 定时触发</div>
+                <div style="width: 2px; height: 25px; background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);"></div>
+            </div>
+            
+            <!-- 智能体 -->
+            <div style="background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%); color: #fff; padding: 0; border-radius: 8px; box-shadow: 4px 4px 0 rgba(90,103,216,0.4); min-width: 450px; overflow: hidden;">
+                <div style="background: rgba(255,255,255,0.2); color: #fff; padding: 12px; text-align: center; font-weight: 700; font-size: 15px; border-bottom: 2px solid rgba(255,255,255,0.3);">
+                    智能体：更新 3 个数据源
+                </div>
+                <div style="background: rgba(255,255,255,0.95); color: #1a1a1a; padding: 15px 25px;">
+                    <ul style="list-style: none; padding: 0; margin: 0; font-size: 13px; line-height: 2.2;">
+                        <li style="padding: 3px 0; border-bottom: 1px dashed #e0e0e0;">— 项目进度看板（多维表格）</li>
+                        <li style="padding: 3px 0; border-bottom: 1px dashed #e0e0e0;">— 部门周报汇总（多维表格）</li>
+                        <li style="padding: 3px 0;">— 服务台运维记录（多维表格）</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- 箭头 02 + 定时触发 -->
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                <div style="width: 2px; height: 25px; background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);"></div>
+                <div style="background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%); color: #2d3748; padding: 5px 14px; border-radius: 4px; font-size: 11px; font-weight: 600; border: 2px solid #667eea; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">02 定时触发</div>
+                <div style="width: 2px; height: 25px; background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);"></div>
+            </div>
+            
+            <!-- 飞书妙搭 和 智能体 -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; width: 100%; max-width: 750px; align-items: start;">
+                <!-- 飞书妙搭 -->
+                <div style="background: linear-gradient(135deg, #805ad5 0%, #9f7aea 100%); color: #fff; padding: 0; border-radius: 8px; box-shadow: 4px 4px 0 rgba(128,90,213,0.4);">
+                    <div style="background: rgba(255,255,255,0.2); color: #fff; padding: 12px; text-align: center; font-weight: 700; font-size: 15px; border-bottom: 2px solid rgba(255,255,255,0.3);">
+                        飞书妙搭
+                    </div>
+                    <div style="background: rgba(255,255,255,0.95); color: #1a1a1a; padding: 15px 20px;">
+                        <ul style="list-style: none; padding: 0; margin: 0; font-size: 13px; line-height: 2.2;">
+                            <li style="padding: 3px 0; border-bottom: 1px dashed #e0e0e0;">— 更新飞书项目进度看板</li>
+                            <li style="padding: 3px 0;">— 更新服务台监控仪表盘</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- 智能体 -->
+                <div style="background: linear-gradient(135deg, #805ad5 0%, #9f7aea 100%); color: #fff; padding: 0; border-radius: 8px; box-shadow: 4px 4px 0 rgba(128,90,213,0.4);">
+                    <div style="background: rgba(255,255,255,0.2); color: #fff; padding: 12px; text-align: center; font-weight: 700; font-size: 15px; border-bottom: 2px solid rgba(255,255,255,0.3);">
+                        智能体
+                    </div>
+                    <div style="background: rgba(255,255,255,0.95); color: #1a1a1a; padding: 15px 20px;">
+                        <ul style="list-style: none; padding: 0; margin: 0; font-size: 13px; line-height: 2.2;">
+                            <li style="padding: 3px 0; border-bottom: 1px dashed #e0e0e0;">— 生成工单分析报告（飞书文档）</li>
+                            <li style="padding: 3px 0;">— 按模板生成周简报（飞书卡片）</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 箭头 03 + 确认后发送 -->
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                <div style="width: 2px; height: 25px; background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);"></div>
+                <div style="background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%); color: #2d3748; padding: 5px 14px; border-radius: 4px; font-size: 11px; font-weight: 600; border: 2px solid #667eea; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">03 确认后发送</div>
+                <div style="width: 2px; height: 25px; background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);"></div>
+            </div>
+            
+            <!-- 团队群成员 -->
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 16px 50px; border-radius: 8px; font-weight: 700; font-size: 16px; box-shadow: 4px 4px 0 rgba(102,126,234,0.4);">
+                👥 团队群成员：收到通知
+            </div>
+        </div>
+    </div>
+
+    <!-- 第 4 页：实施路径 -->
+    <div class="slide" data-page="5">
+        <h2 class="slide-title">三、核心架构：从"数据孤岛"到"智能聚合"</h2>
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div style="display: inline-block; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); padding: 8px 24px; border-radius: 20px; font-size: 14px; font-weight: 600; letter-spacing: 2px;">
+                实施路径
+            </div>
+        </div>
+        <div class="timeline">
+            <div class="timeline-phase">
+                <div style="background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%); color: #fff; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 20px;">
+                    <div style="font-size: 11px; letter-spacing: 2px; opacity: 0.8; margin-bottom: 8px;">PHASE 01</div>
+                    <div style="font-size: 20px; font-weight: 700;">准备阶段</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.95); padding: 20px; border-radius: 12px;">
+                    <div style="font-size: 13px; font-weight: 600; color: #1a1a1a; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #e5e7eb;">
+                        关键动作：梳理数据源
+                    </div>
+                    <ul class="phase-list">
+                        <li>对接 3 个多维表格数据源</li>
+                        <li>明确数据结构和字段</li>
+                        <li>确认访问权限配置</li>
+                    </ul>
+                    <div style="margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 8px; border-left: 4px solid #667eea;">
+                        <div style="font-size: 12px; font-weight: 600; color: #1a1a1a; margin-bottom: 5px;">产出</div>
+                        <div style="font-size: 13px; color: #4a5568;">数据接入点就绪</div>
+                    </div>
+                </div>
+            </div>
+            <div class="timeline-phase">
+                <div style="background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%); color: #fff; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 20px;">
+                    <div style="font-size: 11px; letter-spacing: 2px; opacity: 0.8; margin-bottom: 8px;">PHASE 02</div>
+                    <div style="font-size: 20px; font-weight: 700;">配置阶段</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.95); padding: 20px; border-radius: 12px;">
+                    <div style="font-size: 13px; font-weight: 600; color: #1a1a1a; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #e5e7eb;">
+                        关键动作：提示词 + 定时任务
+                    </div>
+                    <ul class="phase-list">
+                        <li>编写提示词模板</li>
+                        <li>配置自动化定时任务</li>
+                        <li>设置输出格式规范</li>
+                    </ul>
+                    <div style="margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 8px; border-left: 4px solid #667eea;">
+                        <div style="font-size: 12px; font-weight: 600; color: #1a1a1a; margin-bottom: 5px;">产出</div>
+                        <div style="font-size: 13px; color: #4a5568;">自动化任务就绪</div>
+                    </div>
+                </div>
+            </div>
+            <div class="timeline-phase">
+                <div style="background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%); color: #fff; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 20px;">
+                    <div style="font-size: 11px; letter-spacing: 2px; opacity: 0.8; margin-bottom: 8px;">PHASE 03</div>
+                    <div style="font-size: 20px; font-weight: 700;">验证阶段</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.95); padding: 20px; border-radius: 12px;">
+                    <div style="font-size: 13px; font-weight: 600; color: #1a1a1a; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #e5e7eb;">
+                        关键动作：测试调优
+                    </div>
+                    <ul class="phase-list">
+                        <li>全链路测试验证</li>
+                        <li>输出内容校准优化</li>
+                        <li>持续迭代改进</li>
+                    </ul>
+                    <div style="margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 8px; border-left: 4px solid #667eea;">
+                        <div style="font-size: 12px; font-weight: 600; color: #1a1a1a; margin-bottom: 5px;">产出</div>
+                        <div style="font-size: 13px; color: #4a5568;">稳定运行流程</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 第 5 页：后续探索 -->
+    <div class="slide" data-page="6" style="padding: 40px 60px;">
+        <h2 class="slide-title" style="margin-bottom: 20px;">五、后续探索：从"知识沉睡"到"问即所得"</h2>
+        
+        <!-- 建设目标 -->
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 25px 35px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 6px 20px rgba(0,0,0,0.25);">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div style="font-size: 36px;">🎯</div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <div style="font-size: 16px; font-weight: 700; opacity: 0.9;">建设目标</div>
+                    <div style="font-size: 18px; line-height: 1.6; font-weight: 500;">
+                        让知识从<strong>「躺在文档里」</strong>变成<strong>「随时可问答」</strong>，降低重复劳动，加速知识复用
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 三列布局：数据准备 + 技术方案 + 使用入口 -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+            <!-- 数据准备 -->
+            <div style="background: rgba(255,255,255,0.98); border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #e5e7eb;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 2px solid #667eea;">
+                    <div style="font-size: 20px;">📥</div>
+                    <div style="font-size: 14px; font-weight: 700; color: #1a1a1a;">数据准备</div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #dee2e6;">
+                        <div style="font-size: 24px; margin-bottom: 4px;">📊</div>
+                        <div style="font-size: 11px; font-weight: 600; color: #1a1a1a;">历史周报</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #dee2e6;">
+                        <div style="font-size: 24px; margin-bottom: 4px;">📋</div>
+                        <div style="font-size: 11px; font-weight: 600; color: #1a1a1a;">高频工单</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #dee2e6;">
+                        <div style="font-size: 24px; margin-bottom: 4px;">📚</div>
+                        <div style="font-size: 11px; font-weight: 600; color: #1a1a1a;">培训材料</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #dee2e6;">
+                        <div style="font-size: 24px; margin-bottom: 4px;">❓</div>
+                        <div style="font-size: 11px; font-weight: 600; color: #1a1a1a;">FAQ</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 技术方案 -->
+            <div style="background: rgba(255,255,255,0.98); border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #e5e7eb;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 2px solid #667eea;">
+                    <div style="font-size: 20px;">⚙️</div>
+                    <div style="font-size: 14px; font-weight: 700; color: #1a1a1a;">技术方案</div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; flex: 1;">
+                    <div style="flex: 1; background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); color: #1a1a1a; padding: 12px 8px; border-radius: 8px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                        <div style="font-size: 28px; margin-bottom: 6px;">📄</div>
+                        <div style="font-size: 11px; font-weight: 600;">文档向量化</div>
+                    </div>
+                    <div style="font-size: 20px; color: #667eea; font-weight: 700;">→</div>
+                    <div style="flex: 1; background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); color: #1a1a1a; padding: 12px 8px; border-radius: 8px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                        <div style="font-size: 28px; margin-bottom: 6px;">🔍</div>
+                        <div style="font-size: 11px; font-weight: 600;">RAG 检索</div>
+                    </div>
+                    <div style="font-size: 20px; color: #667eea; font-weight: 700;">→</div>
+                    <div style="flex: 1; background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); color: #1a1a1a; padding: 12px 8px; border-radius: 8px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                        <div style="font-size: 28px; margin-bottom: 6px;">🔗</div>
+                        <div style="font-size: 11px; font-weight: 600;">来源引用</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 使用入口 -->
+            <div style="background: rgba(255,255,255,0.98); border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #e5e7eb;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 2px solid #667eea;">
+                    <div style="font-size: 20px;">🚪</div>
+                    <div style="font-size: 14px; font-weight: 700; color: #1a1a1a;">使用入口</div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 8px; border: 1px solid #dee2e6; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+                        <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff;">💻</div>
+                        <div style="font-size: 12px; font-weight: 600; color: #1a1a1a;">接入飞书聊天机器人</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 8px; border: 1px solid #dee2e6; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+                        <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff;">💬</div>
+                        <div style="font-size: 12px; font-weight: 600; color: #1a1a1a;">支持多轮追问</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 8px; border: 1px solid #dee2e6; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+                        <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff;">📱</div>
+                        <div style="font-size: 12px; font-weight: 600; color: #1a1a1a;">移动端随时访问</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 两列布局：验证计划 + 预期价值 -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <!-- 验证计划 -->
+            <div style="background: rgba(255,255,255,0.98); border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #e5e7eb;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #667eea;">
+                    <div style="font-size: 20px;">📅</div>
+                    <div style="font-size: 14px; font-weight: 700; color: #1a1a1a;">验证计划</div>
+                </div>
+                <div style="position: relative; padding-left: 15px;">
+                    <div style="position: absolute; left: 5px; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, #667eea 0%, #764ba2 100%); border-radius: 3px;"></div>
+                    <div style="position: relative; margin-bottom: 12px;">
+                        <div style="position: absolute; left: -16px; top: 2px; width: 10px; height: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: 3px solid #fff; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></div>
+                        <div style="font-size: 13px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px;">第 1-2 周：跑通 MVP</div>
+                        <div style="font-size: 11px; color: #6b7280;">优先高频问题，验证核心流程</div>
+                    </div>
+                    <div style="position: relative; margin-bottom: 12px;">
+                        <div style="position: absolute; left: -16px; top: 2px; width: 10px; height: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: 3px solid #fff; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></div>
+                        <div style="font-size: 13px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px;">第 3-4 周：收集反馈</div>
+                        <div style="font-size: 11px; color: #6b7280;">扩充知识库，优化回答质量</div>
+                    </div>
+                    <div style="position: relative;">
+                        <div style="position: absolute; left: -16px; top: 2px; width: 10px; height: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: 3px solid #fff; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></div>
+                        <div style="font-size: 13px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px;">持续运营</div>
+                        <div style="font-size: 11px; color: #6b7280;">定期更新知识库，持续迭代</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 预期价值 -->
+            <div style="background: rgba(255,255,255,0.98); border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; overflow: hidden;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #667eea;">
+                    <div style="font-size: 20px;">💡</div>
+                    <div style="font-size: 14px; font-weight: 700; color: #1a1a1a;">预期价值</div>
+                </div>
+                <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                    <thead>
+                        <tr style="background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%); color: #1a1a1a;">
+                            <th style="padding: 10px 8px; text-align: left; font-weight: 600;">维度</th>
+                            <th style="padding: 10px 8px; text-align: left; font-weight: 600;">当前</th>
+                            <th style="padding: 10px 8px; text-align: left; font-weight: 600;">之后</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid #e5e7eb; background: #fff;">
+                            <td style="padding: 10px 8px; color: #1a1a1a; font-weight: 600;">响应速度</td>
+                            <td style="padding: 10px 8px; color: #6b7280;">小时级</td>
+                            <td style="padding: 10px 8px; color: #059669; font-weight: 600;">秒级 ⚡</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e5e7eb; background: #f8f9fa;">
+                            <td style="padding: 10px 8px; color: #1a1a1a; font-weight: 600;">答疑成本</td>
+                            <td style="padding: 10px 8px; color: #6b7280;">重复回答</td>
+                            <td style="padding: 10px 8px; color: #059669; font-weight: 600;">AI 承接 ✅</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e5e7eb; background: #fff;">
+                            <td style="padding: 10px 8px; color: #1a1a1a; font-weight: 600;">新人上手</td>
+                            <td style="padding: 10px 8px; color: #6b7280;">问同事</td>
+                            <td style="padding: 10px 8px; color: #059669; font-weight: 600;">直接问 🚀</td>
+                        </tr>
+                        <tr style="background: #f8f9fa;">
+                            <td style="padding: 10px 8px; color: #1a1a1a; font-weight: 600;">知识沉淀</td>
+                            <td style="padding: 10px 8px; color: #6b7280;">分散沉睡</td>
+                            <td style="padding: 10px 8px; color: #059669; font-weight: 600;">结构化 💎</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导航按钮 -->
+    <button class="nav-btn nav-prev" onclick="prevSlide()">❮</button>
+    <button class="nav-btn nav-next" onclick="nextSlide()">❯</button>
+
+    <script>
+        let currentSlideIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(index) {
+            slides.forEach(s => s.classList.remove('active'));
+            if (slides[index]) {
+                slides[index].classList.add('active');
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlideIndex < totalSlides - 1) {
+                currentSlideIndex++;
+                showSlide(currentSlideIndex);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlideIndex > 0) {
+                currentSlideIndex--;
+                showSlide(currentSlideIndex);
+            }
+        }
+
+        // 初始化显示第一页
+        showSlide(0);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+        // 触摸滑动支持（移动端）
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, false);
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, false);
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            if (touchStartX - touchEndX > swipeThreshold) {
+                nextSlide();
+            } else if (touchEndX - touchStartX > swipeThreshold) {
+                prevSlide();
+            }
+        }
+    </script>
+</body>
+</html>
